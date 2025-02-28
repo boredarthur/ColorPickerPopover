@@ -6,7 +6,7 @@ public protocol PopoverColorWellDelegate {
     func colorWell(_ colorWell: PopoverColorWell, didChangeColor color: NSColor)
 }
 
-@objc(RAPopoverColorWell)
+@objc(PopoverColorWell)
 public class PopoverColorWell: NSColorWell {
 	private let colorPanelViewController = ColorPanelViewController()
 
