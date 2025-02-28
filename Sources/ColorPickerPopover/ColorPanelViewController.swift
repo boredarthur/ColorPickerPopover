@@ -52,7 +52,7 @@ internal class ColorPanelViewController: NSViewController {
 		}
 		
 		guard let colorView = colorPanel.contentView else { return }
-		
+        
 		let frame = NSRect(x: 0,
 						   y: 0,
 						   width: colorView.bounds.width,
@@ -62,14 +62,6 @@ internal class ColorPanelViewController: NSViewController {
     }
 	
 	override func viewWillAppear() {
-        NSColorPanel.setPickerMask([
-            .wheelModeMask,
-            .rgbModeMask,
-            .cmykModeMask,
-            .hsbModeMask,
-            .grayModeMask
-        ])
-        
 		embedColorPanel()
 	}
 	
@@ -121,6 +113,10 @@ private extension ColorPanelViewController {
 			return
 		}
 		
+        colorView.translatesAutoresizingMaskIntoConstraints = false
+        colorView.heightAnchor.constraint(equalToConstant: 340).isActive = true
+        colorView.widthAnchor.constraint(equalToConstant: 200).isActive = true
+        
 		view.addSubview(colorView)
 		self.colorView = colorView
 		
@@ -129,6 +125,7 @@ private extension ColorPanelViewController {
 		}
 		
 		let toolbarView = createToolbarView()
+        
 		view.addSubview(toolbarView)
 		self.toolbarView = toolbarView
 		
@@ -238,5 +235,80 @@ private extension ColorPanelViewController {
         }
         
         return nil
+    }
+}
+
+import SwiftUI
+
+public struct ColorPickerPopoverView: NSViewRepresentable {
+    @Binding var selectedColor: Color
+    
+    public init(selectedColor: Binding<Color>) {
+        self._selectedColor = selectedColor
+    }
+    
+    public func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+    
+    public func makeNSView(context: Context) -> PopoverColorWell {
+        let colorWell = PopoverColorWell(frame: .zero)
+        colorWell.delegate = context.coordinator
+        
+        colorWell.color = NSColor(selectedColor)
+        return colorWell
+    }
+    
+    public func updateNSView(_ nsView: PopoverColorWell, context: Context) {
+        // Sync SwiftUI's color -> NSView
+        nsView.color = NSColor(selectedColor)
+    }
+    
+    // MARK: - Coordinator
+    public class Coordinator: NSObject, PopoverColorWellDelegate {
+        var parent: ColorPickerPopoverView
+        
+        init(_ parent: ColorPickerPopoverView) {
+            self.parent = parent
+        }
+        
+        // Delegate callback from RAPopoverColorWell
+        public func colorWell(_ colorWell: PopoverColorWell, didChangeColor color: NSColor) {
+            // Update the SwiftUI binding
+            DispatchQueue.main.async {
+                self.parent.selectedColor = Color(color)
+            }
+        }
+    }
+}
+
+
+public struct ColorPickerTestView: View {
+    @State private var selectedColor: Color = .blue
+    
+    public init() {}
+    
+    public var body: some View {
+        VStack(spacing: 20) {
+            Text("Test Color Picker")
+                .font(.headline)
+                .foregroundColor(selectedColor)
+            
+            // Our SwiftUI wrapper for the popover color well:
+            ColorPickerPopoverView(selectedColor: $selectedColor)
+                .frame(width: 60, height: 30)
+                .border(Color.gray)
+            
+            Text("Selected Color")
+                .foregroundColor(selectedColor)
+        }
+        .padding()
+    }
+}
+
+struct ColorPickerTestView_Previews: PreviewProvider {
+    static var previews: some View {
+        ColorPickerTestView()
+            .previewLayout(.sizeThatFits)
     }
 }
