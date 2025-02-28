@@ -114,10 +114,11 @@ private extension ColorPanelViewController {
 		}
 		
         colorView.translatesAutoresizingMaskIntoConstraints = false
-        colorView.heightAnchor.constraint(equalToConstant: 340).isActive = true
+        colorView.heightAnchor.constraint(equalToConstant: 350).isActive = true
         colorView.widthAnchor.constraint(equalToConstant: 200).isActive = true
         
 		view.addSubview(colorView)
+        
 		self.colorView = colorView
 		
 		if let swatch = locateColorSwatch() {
