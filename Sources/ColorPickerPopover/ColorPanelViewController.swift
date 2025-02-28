@@ -62,6 +62,14 @@ internal class ColorPanelViewController: NSViewController {
     }
 	
 	override func viewWillAppear() {
+        NSColorPanel.setPickerMask([
+            .wheelModeMask,
+            .rgbModeMask,
+            .cmykModeMask,
+            .hsbModeMask,
+            .grayModeMask
+        ])
+        
 		embedColorPanel()
 	}
 	
